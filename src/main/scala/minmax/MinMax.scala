@@ -40,14 +40,18 @@ trait MinMax[St<:State[St,Sc,T], Sc<:Score[Sc], T<:Table] {
   val initial: St
   
   def from(state: St): Seq[St] = {
-    for {
-      ns <- state.posibleStates(heuristic)
-    } yield {
-      if(heuristic.prune(ns)){
-        ns
-      } else {
-        ns.updateScore(from(ns))
-      }
+    if(state.isEndOfTheGame) {
+      Nil
+    } else {
+        for {
+        ns <- state.posibleStates(heuristic)
+      } yield {
+        if(heuristic.prune(ns)){
+          ns
+        } else {
+          ns.updateScore(from(ns))
+        }
+      }  
     }
   }
   
