@@ -4,6 +4,7 @@ import minmax._
 
 trait TableBoard{
   def move(m: Move): TableBoard
+  def possibleMoves[S >: Move]: Seq[S]
   val square: Int
   type Terrain = (Int, Int) => Move
   
@@ -22,6 +23,12 @@ trait TableBoard{
     } yield Rival(x,y)
 }
 
-case class Me(val x: Int, val y:Int) extends Move
-case class Rival(val x: Int, val y:Int) extends Move
-case class None(val x: Int, val y:Int) extends Move
+case class Me(val x: Int, val y:Int) extends Move {
+  def isEmpty = false
+}
+case class Rival(val x: Int, val y:Int) extends Move {
+  def isEmpty = false
+}
+case class None(val x: Int, val y:Int) extends Move {
+  def isEmpty = true
+}
