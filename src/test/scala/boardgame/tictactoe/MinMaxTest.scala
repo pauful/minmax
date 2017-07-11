@@ -25,22 +25,21 @@ class MinMaxTest extends FunSuite {
     }
     var initial= BoardState(BoardScore(0), Rival(0,0), Nil, TableBoard(terrain, 1, 3) )
     var ttt = TicTacToeGame(initial,h)
-    var na= ttt.bestNextAction
-    assert(na == Me(2,2))
+    assert(ttt.bestNextAction.get == Me(2,2))
     
-    var newTerrain = TableBoard(terrain, 1, 3).move(ttt.bestNextAction).move(Rival(1,1))
+    var newTerrain = TableBoard(terrain, 1, 3).move(ttt.bestNextAction.getOrElse(None(0,0))).move(Rival(1,1))
     println(newTerrain)
     println
     initial= BoardState(BoardScore(0), Rival(1,1), Nil, TableBoard(newTerrain.terrain, 1, 3) )
     ttt = TicTacToeGame(initial,h)
-    assert(ttt.bestNextAction == Me(1,2))
+    assert(ttt.bestNextAction.get == Me(1,2))
     
-    newTerrain = TableBoard(newTerrain.terrain, 1, 3).move(ttt.bestNextAction).move(Rival(3,2))
+    newTerrain = TableBoard(newTerrain.terrain, 1, 3).move(ttt.bestNextAction.getOrElse(None(0,0))).move(Rival(3,2))
     println(newTerrain)
     println
     initial= BoardState(BoardScore(0), Rival(1,2), Nil, TableBoard(newTerrain.terrain, 1, 3) )
     ttt = TicTacToeGame(initial,h)
-    assert(ttt.bestNextAction == Me(1,3))
+    assert(ttt.bestNextAction.get == Me(1,3))
   }
   
 }

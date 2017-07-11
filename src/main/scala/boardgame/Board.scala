@@ -69,7 +69,7 @@ case class BoardState(val score: BoardScore, val lastMove: Move, val childs: Lis
     }
   }
   
-  def isEndOfTheGame: Boolean = board.possibleMoves.size == 0
+  def isEndOfTheGame: Boolean = board.possibleMoves.size == 0 || !childs.filter(t => t.score.value > 999 || t.score.value < -999).isEmpty
 }
 
 case class BoardScore(val value: Int) extends Score[BoardScore] {
