@@ -47,22 +47,34 @@ case class TicTacToeHeuristic(val values: Map[String,Map[String, Int]]) extends 
   def win(s: TableBoard): Int = {
     val nrows = s.myPieces.groupBy(_.x).filter({case (_,l) => l.size ==3}).size
     val ncols = s.myPieces.groupBy(_.y).filter({case (_,l) => l.size ==3}).size
+    val diagonal1 = if(s.myPieces.filter({case Me(x,y) => x==y}).size == 3) 1 else 0
+    val diagonal2 = if (((s.max to s.min by -1) zip (s.min to s.max) )
+      .map({case (x,y)=>s.terrain(x,y)}).filter({
+        case Me(_,_) => true
+        case _ => false}).size == 3) 1 else 0
     
-    (values get "win" get "Me") * (nrows + ncols)
+    (values get "win" get "Me") * (nrows + ncols + diagonal1 + diagonal2)
   }
   
   def defeat(s: TableBoard): Int = {
     val nrows = s.rivalPieces.groupBy(_.x).filter({case (_,l) => l.size ==3}).size
     val ncols = s.rivalPieces.groupBy(_.y).filter({case (_,l) => l.size ==3}).size
+    val diagonal = if(s.rivalPieces.filter({case Rival(x,y) => x==y}).size == 3) 1 else 0
+    val diagonal2 = if (((s.max to s.min by -1) zip (s.min to s.max) )
+      .map({case (x,y)=>s.terrain(x,y)}).filter({
+        case Rival(_,_) => true
+        case _ => false}).size == 3) 1 else 0
     
-    (values get "win" get "Rival") * (nrows + ncols)
+    (values get "win" get "Rival") * (nrows + ncols + diagonal + diagonal2)
   }
   
   def score(t: TableBoard): BoardScore = {
+//    println(defeat(t) + " " + win(t) +" " + corners(t) + " " + centerScore(t) + " " + pairs(t))
+//    println(t)
     BoardScore(defeat(t) + win(t) + corners(t) + centerScore(t) + pairs(t))
   }
   
   def prune(s: BoardState): Boolean = {
-    s.score.value > 999 || s.score.value < -999 || s.childs.size == 2
+    s.score.value > 999 || s.score.value < -999 || s.childs.size == 4
   }
 }
