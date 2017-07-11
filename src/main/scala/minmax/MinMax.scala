@@ -19,7 +19,9 @@ trait State[St<:State[St,Sc,T], Sc<:Score[Sc], T<:Table] extends Ordered[St] {
   def isEndOfTheGame: Boolean
 }
 
-trait Move
+trait Move {
+  def name: String
+}
 
 trait Table
 

@@ -1,0 +1,19 @@
+{
+	"center": {
+		"Me": 6,
+		"Rival": -6,
+		"None": 0
+	},
+	"pairs": {
+		"Me": 2,
+		"Rival": 2
+	},
+	"corners": {
+		"Me": 2,
+		"Rival": 2
+	},
+	"win": {
+		"Me": 1000,
+		"Rival": -1000
+	}
+}

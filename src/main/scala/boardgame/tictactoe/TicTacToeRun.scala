@@ -3,6 +3,10 @@ package boardgame.tictactoe
 import minmax._
 import boardgame._
 
+import org.json4s._
+import org.json4s.jackson.JsonMethods._
+import scala.io.Source
+
 object TicTacToeRun {
   
   def getUserInput: (Int,Int) = {
@@ -13,11 +17,14 @@ object TicTacToeRun {
     (col,row)
   }
   
-  case class TicTacToeGame(val initial: BoardState) extends MinMax[BoardState,BoardScore,TableBoard] {
-    val heuristic = TicTacToeHeuristic
-  }
+  case class TicTacToeGame(val initial: BoardState, val heuristic: TicTacToeHeuristic) extends MinMax[BoardState,BoardScore,TableBoard]
   
   def main(args: Array[String]): Unit = {
+    implicit val formats = DefaultFormats
+    val values = parse(Source.fromInputStream(getClass.getResourceAsStream("/values.json")).getLines.mkString)
+                .extract[Map[String, Map[String,Int]]]
+    
+    val h = new TicTacToeHeuristic(values)
     
     var terrain: (Int, Int) => Move = {
       (x,y) => None(x,y)
@@ -33,8 +40,8 @@ object TicTacToeRun {
       table = TableBoard(table.terrain, 1, 3).move(Rival(input._1,input._2))
     }
     
-    while(!TicTacToeHeuristic.prune(currentState) || !currentState.isEndOfTheGame) {
-      table = TableBoard(table.terrain, 1, 3).move(TicTacToeGame(currentState).bestNextAction)
+    while(h.prune(currentState) || !currentState.isEndOfTheGame) {
+      table = TableBoard(table.terrain, 1, 3).move(TicTacToeGame(currentState, h).bestNextAction)
       println(table)
       println
       var input = getUserInput

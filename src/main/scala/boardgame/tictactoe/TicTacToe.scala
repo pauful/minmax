@@ -3,14 +3,10 @@ package boardgame.tictactoe
 import minmax._
 import boardgame._
 
-object TicTacToeHeuristic extends Heuristic[BoardState, BoardScore,TableBoard] {
+case class TicTacToeHeuristic(val values: Map[String,Map[String, Int]]) extends Heuristic[BoardState, BoardScore,TableBoard] {
   
   def centerScore(s: TableBoard): Int = {
-    s.terrain(2,2) match {
-      case Me(_,_) => 6
-      case Rival(_,_) => -6
-      case None(_,_) => 0
-    }
+    values get "center" get s.terrain(2,2).name
   }
   
   def pairs(s:TableBoard): Int = {
@@ -35,7 +31,7 @@ object TicTacToeHeuristic extends Heuristic[BoardState, BoardScore,TableBoard] {
      
      val pairsRival = rrows + rcols
      
-     2 * pairsMe - 2 * pairsRival
+     (values get "pairs" get "Me") * pairsMe - (values get "pairs" get "Rival") * pairsRival
   }
   
   def corners(s:TableBoard): Int = {
@@ -45,21 +41,21 @@ object TicTacToeHeuristic extends Heuristic[BoardState, BoardScore,TableBoard] {
     val rivalCorners = s.rivalPieces.filter(t => (t.x == 1 && t.y == 1) || (t.x == 1 && t.y == 3)
                                                   || (t.x == 3 && t.y == 1) || (t.x == 3 && t.y == 3)).size
                                                   
-    myCorners * 2 - 2 * rivalCorners                                          
+    myCorners * (values get "corners" get "Me") - (values get "corners" get "Me") * rivalCorners                                          
   }
   
   def win(s: TableBoard): Int = {
     val nrows = s.myPieces.groupBy(_.x).filter({case (_,l) => l.size ==3}).size
     val ncols = s.myPieces.groupBy(_.y).filter({case (_,l) => l.size ==3}).size
     
-    1000 * nrows + 1000 * ncols
+    (values get "win" get "Me") * (nrows + ncols)
   }
   
   def defeat(s: TableBoard): Int = {
     val nrows = s.rivalPieces.groupBy(_.x).filter({case (_,l) => l.size ==3}).size
     val ncols = s.rivalPieces.groupBy(_.y).filter({case (_,l) => l.size ==3}).size
     
-    -1000 * nrows + -1000 * ncols
+    (values get "win" get "Rival") * (nrows + ncols)
   }
   
   def score(t: TableBoard): BoardScore = {

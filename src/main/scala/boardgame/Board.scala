@@ -78,6 +78,12 @@ case class BoardScore(val value: Int) extends Score[BoardScore] {
   }
 }
 
-case class Me(val x: Int, val y:Int) extends Move
-case class Rival(val x: Int, val y:Int) extends Move
-case class None(val x: Int, val y:Int) extends Move
+case class Me(val x: Int, val y:Int) extends Move {
+  def name = "Me"
+}
+case class Rival(val x: Int, val y:Int) extends Move {
+  def name = "Rival"
+}
+case class None(val x: Int, val y:Int) extends Move {
+  def name = "None"
+}
