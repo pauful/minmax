@@ -13,7 +13,7 @@ object TicTacToeRun {
     (col,row)
   }
   
-  case class TicTacToeGame(val initial: TicTacToeState) extends MinMax[TicTacToeState,TicTacToeScore,TicTacToeTable] {
+  case class TicTacToeGame(val initial: BoardState) extends MinMax[BoardState,BoardScore,TableBoard] {
     val heuristic = TicTacToeHeuristic
   }
   
@@ -22,27 +22,25 @@ object TicTacToeRun {
     var terrain: (Int, Int) => Move = {
       (x,y) => None(x,y)
     }
-    var table = TicTacToeTable(terrain, 1, 3)
-    var currentState = TicTacToeState(TicTacToeScore(0), Rival(0,0), Nil, TicTacToeTable(terrain, 1, 3))
+    var table = TableBoard(terrain, 1, 3)
+    var currentState = BoardState(BoardScore(0), Rival(0,0), Nil, TableBoard(terrain, 1, 3))
     println("Do you wanna start? [yes,no]")
     if(scala.io.StdIn.readLine() == "yes") {
       
-      table = TicTacToeTable(terrain, 1, 3).move(Rival(1,1))
+      table = TableBoard(terrain, 1, 3).move(Rival(1,1))
       var input = getUserInput
-      currentState = TicTacToeState(TicTacToeScore(0), Rival(input._1,input._2), Nil, table)
-      table = TicTacToeTable(table.terrain, 1, 3).move(Rival(input._1,input._2))
+      currentState = BoardState(BoardScore(0), Rival(input._1,input._2), Nil, table)
+      table = TableBoard(table.terrain, 1, 3).move(Rival(input._1,input._2))
     }
     
-    while(!TicTacToeHeuristic.prune(currentState)) {
-      table = TicTacToeTable(table.terrain, 1, 3).move(TicTacToeGame(currentState).bestNextAction)
+    while(!TicTacToeHeuristic.prune(currentState) || !currentState.isEndOfTheGame) {
+      table = TableBoard(table.terrain, 1, 3).move(TicTacToeGame(currentState).bestNextAction)
       println(table)
       println
       var input = getUserInput
-      currentState = TicTacToeState(TicTacToeScore(0), Rival(input._1,input._2), Nil, table)
-      table = TicTacToeTable(table.terrain, 1, 3).move(Rival(input._1,input._2))
-    }
-    
-      
+      currentState = BoardState(BoardScore(0), Rival(input._1,input._2), Nil, table)
+      table = TableBoard(table.terrain, 1, 3).move(Rival(input._1,input._2))
+    }  
   }
 }
 

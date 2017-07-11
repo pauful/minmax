@@ -5,7 +5,7 @@ import Stream._
 trait State[St<:State[St,Sc,T], Sc<:Score[Sc], T<:Table] extends Ordered[St] {
   
   val score: Sc
-  val move: Move
+  val lastMove: Move
   val childs: List[St]
   
   def posibleStates(h: Heuristic[St,Sc,T]): Seq[St]
@@ -19,9 +19,7 @@ trait State[St<:State[St,Sc,T], Sc<:Score[Sc], T<:Table] extends Ordered[St] {
   def isEndOfTheGame: Boolean
 }
 
-trait Move {
-  def isEmpty: Boolean
-}
+trait Move
 
 trait Table
 
@@ -52,7 +50,7 @@ trait MinMax[St<:State[St,Sc,T], Sc<:Score[Sc], T<:Table] {
   }
   
   def bestNextAction: Move = {
-    from(initial).maxBy(_.score).move
+    from(initial).maxBy(_.score).lastMove
   }
   
 }
