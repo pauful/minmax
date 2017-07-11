@@ -2,23 +2,24 @@ package boardgame
 
 import minmax._
 
-trait TableBoard{
+trait TableBoard extends Table{
   def move(m: Move): TableBoard
   def possibleMoves[S >: Move]: Seq[S]
-  val square: Int
+  val min: Int
+  val max: Int
   type Terrain = (Int, Int) => Move
   
   val terrain: Terrain
   
   val myPieces: Seq[Me] = for {
-      x <- 1 to square
-      y <- 1 to square
+      x <- min to max
+      y <- min to max
       if (terrain(x,y) == Me(x,y))
     } yield Me(x,y)
     
    val rivalPieces: Seq[Rival] = for {
-      x <- 1 to square
-      y <- 1 to square
+      x <- min to max
+      y <- min to max
       if (terrain(x,y) == Rival(x,y))
     } yield Rival(x,y)
 }

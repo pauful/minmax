@@ -13,39 +13,33 @@ object TicTacToeRun {
     (col,row)
   }
   
-  case class TicTacToeGame(val initial: TicTacToeState) extends MinMax[TicTacToeState,TicTacToeScore] {
+  case class TicTacToeGame(val initial: TicTacToeState) extends MinMax[TicTacToeState,TicTacToeScore,TicTacToeTable] {
     val heuristic = TicTacToeHeuristic
-    
-    
-    def main(args: Array[String]): Unit = {
-      println("Hello, world!")
-    }
   }
   
   def main(args: Array[String]): Unit = {
     
-    
     var terrain: (Int, Int) => Move = {
       (x,y) => None(x,y)
     }
-    var table = TicTacToeTable(terrain)
-    var currentState = TicTacToeState(TicTacToeScore(0), Rival(0,0), Nil, TicTacToeTable(terrain))
+    var table = TicTacToeTable(terrain, 1, 3)
+    var currentState = TicTacToeState(TicTacToeScore(0), Rival(0,0), Nil, TicTacToeTable(terrain, 1, 3))
     println("Do you wanna start? [yes,no]")
     if(scala.io.StdIn.readLine() == "yes") {
       
-      table = TicTacToeTable(terrain).move(Rival(1,1))
+      table = TicTacToeTable(terrain, 1, 3).move(Rival(1,1))
       var input = getUserInput
       currentState = TicTacToeState(TicTacToeScore(0), Rival(input._1,input._2), Nil, table)
-      table = TicTacToeTable(table.terrain).move(Rival(input._1,input._2))
+      table = TicTacToeTable(table.terrain, 1, 3).move(Rival(input._1,input._2))
     }
     
     while(!TicTacToeHeuristic.prune(currentState)) {
-      table = TicTacToeTable(table.terrain).move(TicTacToeGame(currentState).bestNextAction)
+      table = TicTacToeTable(table.terrain, 1, 3).move(TicTacToeGame(currentState).bestNextAction)
       println(table)
       println
       var input = getUserInput
       currentState = TicTacToeState(TicTacToeScore(0), Rival(input._1,input._2), Nil, table)
-      table = TicTacToeTable(table.terrain).move(Rival(input._1,input._2))
+      table = TicTacToeTable(table.terrain, 1, 3).move(Rival(input._1,input._2))
     }
     
       

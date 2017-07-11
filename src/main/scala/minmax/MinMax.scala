@@ -2,27 +2,31 @@ package minmax
 
 import Stream._
 
-trait State[St<:State[St,Sc], Sc<:Score[Sc]] extends Ordered[St] {
+trait State[St<:State[St,Sc,T], Sc<:Score[Sc], T<:Table] extends Ordered[St] {
   
   val score: Sc
   val move: Move
   val childs: List[St]
   
-  def posibleStates(h: Heuristic[St,Sc]): Seq[St]
+  def posibleStates(h: Heuristic[St,Sc,T]): Seq[St]
   
-  def score(h: Heuristic[St,Sc]): St
+  def score(h: Heuristic[St,Sc,T]): St
   
   def updateScore(childs: Seq[St]): St
   
   def compare(b: St): Int = score compare b.score
+  
+  def isEndOfTheGame: Boolean
 }
 
 trait Move {
   def isEmpty: Boolean
 }
 
-trait Heuristic[St<:State[St,Sc], Sc<:Score[Sc]] {
-  def score(s: St): Sc
+trait Table
+
+trait Heuristic[St<:State[St,Sc,T], Sc<:Score[Sc], T<:Table] {
+  def score(s: T): Sc
   def prune(state: St): Boolean
 }
 
@@ -30,9 +34,9 @@ trait Score[S<:Score[S]] extends Ordered[S]  {
   def compare(s: S): Int
 }
 
-trait MinMax[St<:State[St,Sc], Sc<:Score[Sc]] {
+trait MinMax[St<:State[St,Sc,T], Sc<:Score[Sc], T<:Table] {
   
-  val heuristic: Heuristic[St,Sc]
+  val heuristic: Heuristic[St,Sc,T]
   val initial: St
   
   def from(state: St): Seq[St] = {
