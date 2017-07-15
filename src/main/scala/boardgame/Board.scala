@@ -49,7 +49,6 @@ case class TableBoard(val terrain: (Int, Int) => Move, val min: Int, val max: In
 case class BoardState(val score: BoardScore, val lastMove: Move, val childs: List[BoardState], val board: TableBoard) extends State[BoardState,BoardScore,TableBoard] {
   
   def posibleStates(h: Heuristic[BoardState,BoardScore,TableBoard]): Seq[BoardState] = {
-
     board.possibleMoves[None].map({
       m => lastMove match {
         case Me(x,y) => BoardState(BoardScore(0), Rival(m.x, m.y), this::this.childs, board.move(Rival(m.x, m.y))).score(h)
@@ -63,13 +62,19 @@ case class BoardState(val score: BoardScore, val lastMove: Move, val childs: Lis
   }
   
   def updateScore(childs: Seq[BoardState]): BoardState = {
-    this.lastMove match {
-      case Me(_,_) => BoardState(childs.maxBy(_.score).score, this.lastMove, this.childs, this.board)
-      case Rival(_,_) => BoardState(childs.minBy(_.score).score, this.lastMove, this.childs, this.board)
+    if(childs.isEmpty) {
+      this
+    } else {
+      this.lastMove match {
+        case Me(_,_) => BoardState(childs.maxBy(_.score).score, this.lastMove, this.childs, this.board)
+        case Rival(_,_) => BoardState(childs.minBy(_.score).score, this.lastMove, this.childs, this.board)
+      }
     }
   }
   
-  def isEndOfTheGame: Boolean = board.possibleMoves.size == 0 || !childs.filter(t => t.score.value > 999 || t.score.value < -999).isEmpty
+  def isEndOfTheGame: Boolean = {
+    board.possibleMoves.size == 0 || !childs.filter(t => t.score.value > 900 || t.score.value < -900).isEmpty
+  }
 }
 
 case class BoardScore(val value: Int) extends Score[BoardScore] {

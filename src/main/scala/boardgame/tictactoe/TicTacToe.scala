@@ -12,19 +12,23 @@ case class TicTacToeHeuristic(val values: Map[String,Map[String, Int]]) extends 
   def pairs(s:TableBoard): Int = {
     
      val nrows = s.myPieces.groupBy(_.x)
-     .map({case (_,l) => if(l.size > 1 && Math.abs(l(0).y - l(1).y) == 1) 1  else 0})
+     .map({case (x,l) => if(l.size > 1 && Math.abs(l(0).y - l(1).y) == 1 
+         && s.rivalPieces.groupBy(_.x).get(x).size == 0) 1  else 0})
      .foldLeft(0)(_+_)
     
      val ncols = s.myPieces.groupBy(_.y)
-     .map({case (_,l) => if(l.size > 1 && Math.abs(l(0).x - l(1).x) == 1) 1  else 0})
+     .map({case (y,l) => if(l.size > 1 && Math.abs(l(0).x - l(1).x) == 1
+         && s.rivalPieces.groupBy(_.y).get(y).size == 0) 1  else 0})
      .foldLeft(0)(_+_)
      
      val rrows = s.rivalPieces.groupBy(_.x)
-     .map({case (_,l) => if(l.size > 1 && Math.abs(l(0).y - l(1).y) == 1) 1  else 0})
+     .map({case (x,l) => if(l.size > 1 && Math.abs(l(0).y - l(1).y) == 1
+         && s.myPieces.groupBy(_.x).get(x).size == 0) 1  else 0})
      .foldLeft(0)(_+_)
     
      val rcols = s.rivalPieces.groupBy(_.y)
-     .map({case (_,l) => if(l.size > 1 && Math.abs(l(0).x - l(1).x) == 1) 1  else 0})
+     .map({case (y,l) => if(l.size > 1 && Math.abs(l(0).x - l(1).x) == 1
+         && s.myPieces.groupBy(_.y).get(y).size == 0) 1  else 0})
      .foldLeft(0)(_+_)
      
      val pairsMe = nrows + ncols
@@ -75,6 +79,6 @@ case class TicTacToeHeuristic(val values: Map[String,Map[String, Int]]) extends 
   }
   
   def prune(s: BoardState): Boolean = {
-    s.score.value > 999 || s.score.value < -999 || s.childs.size == 4
+    s.score.value > 999 || s.score.value < -999 || s.childs.size > 4
   }
 }

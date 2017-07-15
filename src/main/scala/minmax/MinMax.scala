@@ -55,10 +55,12 @@ trait MinMax[St<:State[St,Sc,T], Sc<:Score[Sc], T<:Table] {
     }
   }
   
-  def bestNextAction: Option[Move] = {
+  def bestNextAction: Option[St] = {
+    println("moves")
+    println(from(initial) )
     from(initial) match {
       case Nil => None
-      case xs => Some(xs.maxBy(_.score).lastMove)
+      case xs => Some(xs.maxBy(_.score))
     }
   }
   
