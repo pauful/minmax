@@ -26,8 +26,8 @@ trait Move {
 trait Table
 
 trait Heuristic[St<:State[St,Sc,T], Sc<:Score[Sc], T<:Table] {
-  def score(s: T): Sc
-  def prune(state: St): Boolean
+  def score(s: T, m: Move): Sc
+  def prune(state: St, iteration: Int): Boolean
 }
 
 trait Score[S<:Score[S]] extends Ordered[S]  {
@@ -39,26 +39,24 @@ trait MinMax[St<:State[St,Sc,T], Sc<:Score[Sc], T<:Table] {
   val heuristic: Heuristic[St,Sc,T]
   val initial: St
   
-  def from(state: St): Seq[St] = {
+  def from(state: St, iteration: Int): Seq[St] = {
     if(state.isEndOfTheGame) {
       Nil
     } else {
         for {
         ns <- state.posibleStates(heuristic)
       } yield {
-        if(heuristic.prune(ns)){
+        if(heuristic.prune(ns, iteration)){
           ns
         } else {
-          ns.updateScore(from(ns))
+          ns.updateScore(from(ns, iteration + 1))
         }
       }  
     }
   }
   
-  def bestNextAction: Option[St] = {
-    println("moves")
-    println(from(initial) )
-    from(initial) match {
+  def bestNextAction: Option[St] = { 
+    from(initial, 0) match {
       case Nil => None
       case xs => Some(xs.maxBy(_.score))
     }

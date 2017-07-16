@@ -5,47 +5,79 @@ import boardgame._
 
 case class TicTacToeHeuristic(val values: Map[String,Map[String, Int]]) extends Heuristic[BoardState, BoardScore,TableBoard] {
   
-  def centerScore(s: TableBoard): Int = {
-    values get "center" get s.terrain(2,2).name
+  def myCenterScore(s: TableBoard): Int = {
+    if(s.terrain(2,2) == Me(2,2))
+      values get "center" get s.terrain(2,2).name
+    else
+      0
   }
   
-  def pairs(s:TableBoard): Int = {
+  def rivalCenterScore(s: TableBoard): Int = {
+    if(s.terrain(2,2) == Rival(2,2))
+      values get "center" get s.terrain(2,2).name
+    else
+      0
+  }
+  
+  def filterMe(m: Move): Boolean = m match {
+    case Me(_,_) => true
+    case Rival(_,_) => false
+    case None(_,_) => false
+  }
+  
+  def filterRival(m: Move): Boolean = m match {
+    case Me(_,_) => false
+    case Rival(_,_) => true
+    case None(_,_) => false
+  }
+  
+  def myPairs(s:TableBoard): Int = {
     
      val nrows = s.myPieces.groupBy(_.x)
-     .map({case (x,l) => if(l.size > 1 && Math.abs(l(0).y - l(1).y) == 1 
-         && s.rivalPieces.groupBy(_.x).get(x).size == 0) 1  else 0})
-     .foldLeft(0)(_+_)
+       .map({case (x,l) => if(l.size == 2 && s.rivalPieces.groupBy(_.x).get(x).size == 0) 1  else 0})
+       .foldLeft(0)(_+_)
     
      val ncols = s.myPieces.groupBy(_.y)
-     .map({case (y,l) => if(l.size > 1 && Math.abs(l(0).x - l(1).x) == 1
-         && s.rivalPieces.groupBy(_.y).get(y).size == 0) 1  else 0})
-     .foldLeft(0)(_+_)
-     
-     val rrows = s.rivalPieces.groupBy(_.x)
-     .map({case (x,l) => if(l.size > 1 && Math.abs(l(0).y - l(1).y) == 1
-         && s.myPieces.groupBy(_.x).get(x).size == 0) 1  else 0})
-     .foldLeft(0)(_+_)
-    
-     val rcols = s.rivalPieces.groupBy(_.y)
-     .map({case (y,l) => if(l.size > 1 && Math.abs(l(0).x - l(1).x) == 1
-         && s.myPieces.groupBy(_.y).get(y).size == 0) 1  else 0})
-     .foldLeft(0)(_+_)
+       .map({case (y,l) => if(l.size == 2 && s.rivalPieces.groupBy(_.y).get(y).size == 0) 1  else 0})
+       .foldLeft(0)(_+_)
+       
+     val dm = s.diagonalsList.map(t => t.filter(filterMe).size == 2 && t.filter(filterRival).size == 0).filter(_==true).size
      
      val pairsMe = nrows + ncols
      
-     val pairsRival = rrows + rcols
-     
-     (values get "pairs" get "Me") * pairsMe - (values get "pairs" get "Rival") * pairsRival
+     (values get "pairs" get "Me") * (pairsMe + dm)
   }
   
-  def corners(s:TableBoard): Int = {
+  def rivalPairs(s:TableBoard): Int = {
+     
+     val rrows = s.rivalPieces.groupBy(_.x)
+       .map({case (x,l) => if(l.size == 2 && s.myPieces.groupBy(_.x).get(x).size == 0) 1  else 0})
+       .foldLeft(0)(_+_)
+    
+     val rcols = s.rivalPieces.groupBy(_.y)
+       .map({case (y,l) => if(l.size == 2 && s.myPieces.groupBy(_.y).get(y).size == 0) 1  else 0})
+       .foldLeft(0)(_+_)
+       
+     val dr = s.diagonalsList.map(t => t.filter(filterRival).size == 2 && t.filter(filterMe).size == 0).filter(_==true).size
+     
+     val pairsRival = rrows + rcols
+     
+     (values get "pairs" get "Rival") * (pairsRival + dr)
+  }
+  
+  def myCorners(s:TableBoard): Int = {
     val myCorners = s.myPieces.filter(t => (t.x == 1 && t.y == 1) || (t.x == 1 && t.y == 3)
                                                   || (t.x == 3 && t.y == 1) || (t.x == 3 && t.y == 3)).size
+                                                  
+    (myCorners * (values get "corners" get "Me"))                                          
+  }
+  
+  def rivalCorners(s:TableBoard): Int = {
     
     val rivalCorners = s.rivalPieces.filter(t => (t.x == 1 && t.y == 1) || (t.x == 1 && t.y == 3)
                                                   || (t.x == 3 && t.y == 1) || (t.x == 3 && t.y == 3)).size
                                                   
-    myCorners * (values get "corners" get "Me") - (values get "corners" get "Me") * rivalCorners                                          
+    ((values get "corners" get "Me") * rivalCorners)                                          
   }
   
   def win(s: TableBoard): Int = {
@@ -72,13 +104,12 @@ case class TicTacToeHeuristic(val values: Map[String,Map[String, Int]]) extends 
     (values get "win" get "Rival") * (nrows + ncols + diagonal + diagonal2)
   }
   
-  def score(t: TableBoard): BoardScore = {
-//    println(defeat(t) + " " + win(t) +" " + corners(t) + " " + centerScore(t) + " " + pairs(t))
-//    println(t)
-    BoardScore(defeat(t) + win(t) + corners(t) + centerScore(t) + pairs(t))
+  def score(t: TableBoard, m: Move): BoardScore = {
+    BoardScore((win(t) + myCorners(t) + myPairs(t) + myCenterScore(t)) - 
+          (defeat(t) + rivalCorners(t) + rivalCenterScore(t) + rivalPairs(t)))
   }
   
-  def prune(s: BoardState): Boolean = {
-    s.score.value > 999 || s.score.value < -999 || s.childs.size > 4
+  def prune(s: BoardState, iteration: Int): Boolean = {
+    s.score.value > 999 || s.score.value < -999 || iteration >= (values get "steps" get "Me")
   }
 }

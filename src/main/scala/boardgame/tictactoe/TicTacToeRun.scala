@@ -38,12 +38,12 @@ object TicTacToeRun {
       currentState = BoardState(BoardScore(0), Rival(input._1,input._2), Nil, 
             currentState.board.move(Rival(input._1,input._2)))
     }
-    while(!h.prune(currentState) && !currentState.isEndOfTheGame) {
+    while((h.win(currentState.board) < 900 || h.defeat(currentState.board) > -900)  && !currentState.isEndOfTheGame) {
       currentState.lastMove match {
         case Me(_,_) => {
           var input = getUserInput
           val newBoard = currentState.board.move(Rival(input._1,input._2))
-          currentState = BoardState(h.score(newBoard), Rival(input._1,input._2), Nil, newBoard)
+          currentState = BoardState(h.score(newBoard, Rival(input._1,input._2)), Rival(input._1,input._2), Nil, newBoard)
         }
         case Rival(_,_) => {
           val bestState = TicTacToeGame(currentState, h).bestNextAction.getOrElse(null)
@@ -57,7 +57,7 @@ object TicTacToeRun {
       println
       println(currentState.score.value)
       println(currentState.isEndOfTheGame)
-      print(h.prune(currentState))
+//      print(h.prune(currentState))
     }  
   }
 }

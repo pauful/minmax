@@ -43,6 +43,18 @@ case class TableBoard(val terrain: (Int, Int) => Move, val min: Int, val max: In
       y <- min to max
       if (terrain(x,y) == Rival(x,y))
     } yield Rival(x,y)
+    
+  val diagonalsList: Seq[Seq[Move]] = {
+      val dia1 = for {
+        (x,y) <- ((max to min by -1) zip (min to max) )  
+      } yield terrain(x,y)
+      
+      val dia2 = for {
+        (x,y) <- ((max to min by -1) zip (min to max) )  
+      } yield terrain(x,y)
+      
+      dia1 :: dia2 :: Nil
+    }
 }
 
 
@@ -51,14 +63,14 @@ case class BoardState(val score: BoardScore, val lastMove: Move, val childs: Lis
   def posibleStates(h: Heuristic[BoardState,BoardScore,TableBoard]): Seq[BoardState] = {
     board.possibleMoves[None].map({
       m => lastMove match {
-        case Me(x,y) => BoardState(BoardScore(0), Rival(m.x, m.y), this::this.childs, board.move(Rival(m.x, m.y))).score(h)
-        case Rival(x,y) => BoardState(BoardScore(0), Me(m.x, m.y), this::this.childs, board.move(Me(m.x, m.y))).score(h)
+        case Me(x,y) => BoardState(BoardScore(0), Rival(m.x, m.y), Nil, board.move(Rival(m.x, m.y))).score(h)
+        case Rival(x,y) => BoardState(BoardScore(0), Me(m.x, m.y), Nil, board.move(Me(m.x, m.y))).score(h)
       }
     })    
   }
   
   def score(h: Heuristic[BoardState,BoardScore,TableBoard]): BoardState = {
-    BoardState(h.score(this.board), this.lastMove, this.childs, this.board)
+    BoardState(h.score(this.board, this.lastMove), this.lastMove, this.childs, this.board)
   }
   
   def updateScore(childs: Seq[BoardState]): BoardState = {
@@ -66,14 +78,18 @@ case class BoardState(val score: BoardScore, val lastMove: Move, val childs: Lis
       this
     } else {
       this.lastMove match {
-        case Me(_,_) => BoardState(childs.maxBy(_.score).score, this.lastMove, this.childs, this.board)
-        case Rival(_,_) => BoardState(childs.minBy(_.score).score, this.lastMove, this.childs, this.board)
+        case Me(_,_) => BoardState(childs.minBy(_.score).score, this.lastMove, childs.toList, this.board)
+        case Rival(_,_) => BoardState(childs.maxBy(_.score).score, this.lastMove, childs.toList, this.board)
       }
     }
   }
   
   def isEndOfTheGame: Boolean = {
     board.possibleMoves.size == 0 || !childs.filter(t => t.score.value > 900 || t.score.value < -900).isEmpty
+  }
+  
+  override def toString: String = {
+    this.lastMove + " - " + this.score + "\n" + this.board
   }
 }
 
