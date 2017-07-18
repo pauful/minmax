@@ -110,6 +110,6 @@ case class TicTacToeHeuristic(val values: Map[String,Map[String, Int]]) extends 
   }
   
   def prune(s: BoardState, iteration: Int): Boolean = {
-    s.score.value > 999 || s.score.value < -999 || iteration >= (values get "steps" get "Me")
+    s.score.value > (values get "prune" get "Me") || s.score.value < (values get "prune" get "Rival") || iteration >= (values get "steps" get "Me")
   }
 }

@@ -19,5 +19,9 @@
 	"steps": {
 		"Me": 2,
 		"Rival": 2
+	},
+	"prune": {
+		"Me": 900,
+		"Rival": -900
 	}
 }

@@ -46,7 +46,7 @@ object TicTacToeRun {
           currentState = BoardState(h.score(newBoard, Rival(input._1,input._2)), Rival(input._1,input._2), Nil, newBoard)
         }
         case Rival(_,_) => {
-          val bestState = TicTacToeGame(currentState, h).bestNextAction.getOrElse(null)
+          val bestState = TicTacToeGame(currentState, h).bestNextAction
           val board = currentState.board.move(bestState.lastMove)
           currentState = BoardState(bestState.score, bestState.lastMove, Nil, board)
         }
@@ -54,10 +54,6 @@ object TicTacToeRun {
       println
       println(currentState.lastMove)
       println(currentState.board)
-      println
-      println(currentState.score.value)
-      println(currentState.isEndOfTheGame)
-//      print(h.prune(currentState))
     }  
   }
 }
